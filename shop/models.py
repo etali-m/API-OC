@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 
 # Create your models here.
 class Category(models.Model):
@@ -12,6 +12,18 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+     
+
+    #Nous définissons une action pour désactiver une catégorie
+    @transaction.atomic
+    def disable(self):
+        if self.active is False:
+        # Ne faisons rien si la catégorie est déjà désactivée
+            return
+        self.active = False
+        self.save()
+        self.products.update(active=False) #On désactive par conséquent tout les produits
+ 
     
 
 class Product(models.Model):
@@ -27,6 +39,15 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    @transaction.atomic
+    def disable(self):
+        if self.active is False:
+            # Ne faisons rien si le produit est déjà désactivé  
+            return
+        self.active = False
+        self.save()
+        self.articles.update(active=False)
 
 class Article(models.Model):
 
